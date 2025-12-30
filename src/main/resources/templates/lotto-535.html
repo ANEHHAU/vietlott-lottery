@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <title>Lotto 5/35</title>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f5f6fa;
+            margin: 0;
+            padding: 30px;
+            color: #222;
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .box {
+            background: #fff;
+            border-radius: 8px;
+            padding: 16px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        }
+
+        .numbers span {
+            display: inline-block;
+            background: #2563eb;
+            color: #fff;
+            padding: 8px 12px;
+            margin: 4px;
+            border-radius: 50%;
+            font-weight: bold;
+        }
+
+        button {
+            padding: 10px 16px;
+            background: #16a34a;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+        }
+
+        ul {
+            padding-left: 20px;
+        }
+
+    </style>
+</head>
+
+<body>
+
+<h1>🎯 Lotto 5/35</h1>
+<button onclick="location.href='/'">← Quay về trang chủ</button>
+
+
+<div class="box">
+    <h3>Kết quả mới nhất</h3>
+    <div id="latest">Chưa có dữ liệu</div>
+</div>
+
+<div class="box">
+    <h3>Dự đoán</h3>
+    <button onclick="generate()">Tạo số</button>
+    <div id="predict" class="numbers">Chưa có dữ liệu</div>
+</div>
+
+<div class="box">
+    <h3>Lịch sử dự đoán</h3>
+    <ul id="history">
+        <li>Chưa có dữ liệu</li>
+    </ul>
+</div>
+
+<div class="box">
+    <h3>Phân tích</h3>
+    <div id="analysis">Chưa có dữ liệu</div>
+</div>
+
+<script>
+    let historyData = [];
+
+    function generate() {
+        const nums = generateNumbers();
+        document.getElementById("predict").innerHTML =
+            nums.map(n => `<span>${n}</span>`).join("");
+
+        historyData.unshift(nums);
+        renderHistory();
+        analyze();
+    }
+
+    function generateNumbers() {
+        // 5 số chính từ 1–35
+        const main = new Set();
+        while (main.size < 5) {
+            main.add(Math.floor(Math.random() * 35) + 1);
+        }
+
+        // 1 số đặc biệt 1–12
+        const special = Math.floor(Math.random() * 12) + 1;
+
+        return [...main].sort((a, b) => a - b).concat(special);
+    }
+
+    function renderHistory() {
+        const ul = document.getElementById("history");
+        ul.innerHTML = "";
+        historyData.slice(0, 10).forEach(row => {
+            const li = document.createElement("li");
+            li.textContent = row.join(" - ");
+            ul.appendChild(li);
+        });
+    }
+
+    function analyze() {
+        const count = {};
+        historyData.flat().forEach(n => count[n] = (count[n] || 0) + 1);
+
+        const top = Object.entries(count)
+            .sort((a, b) => b[1] - a[1])
+            .slice(0, 3)
+            .map(x => x[0]);
+
+        document.getElementById("analysis").innerText =
+            "Số xuất hiện nhiều nhất: " + top.join(", ");
+    }
+</script>
+
+</body>
+</html>
