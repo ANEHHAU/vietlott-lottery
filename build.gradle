@@ -1,0 +1,47 @@
+plugins {
+    id 'java'
+    id 'io.spring.dependency-management' version '1.1.7'
+    id 'org.springframework.boot' version '3.2.5'
+
+}
+
+group = 'com.vietlott.lottery'
+version = '0.0.1-SNAPSHOT'
+description = 'vietlott'
+
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(17)
+    }
+}
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    implementation 'org.springframework.boot:spring-boot-starter-web'
+
+    // THYMELEAF
+    implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
+
+    // JPA + HIBERNATE (CUNG CẤP jakarta.persistence.*)
+    implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+
+    // POSTGRESQL DRIVER
+    runtimeOnly 'org.postgresql:postgresql'
+
+    // TEST
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+
+    // lombok
+    compileOnly 'org.projectlombok:lombok'
+    annotationProcessor 'org.projectlombok:lombok'
+}
+
+tasks.named('test') {
+    useJUnitPlatform()
+}
+
+
+
