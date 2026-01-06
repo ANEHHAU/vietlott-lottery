@@ -4,13 +4,11 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Entity
 @Table(
         name = "lottery_result",
-        uniqueConstraints = {
-                @UniqueConstraint(columnNames = {"draw_id", "number"})
-        },
         indexes = {
                 @Index(name = "idx_result_draw", columnList = "draw_id")
         }
@@ -31,13 +29,16 @@ public class LotteryResult {
     @JoinColumn(name = "draw_id", nullable = false)
     private LotteryDraw draw;
 
-    // Số trúng
-    @Column(nullable = false)
-    private int number;
+    // ✅ DANH SÁCH SỐ TRÚNG
+    @ElementCollection
+    @CollectionTable(
+            name = "lottery_result_numbers",
+            joinColumns = @JoinColumn(name = "result_id")
+    )
+    @Column(name = "number")
+    private List<Integer> numbers;
 
-    // Vị trí / thứ tự (giải đặc biệt, giải nhất...)
-    private int position;
-
+    // Thời điểm lưu kết quả
     @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt = LocalDateTime.now();
 }

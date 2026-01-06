@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Vietlott</title>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            background: #f9f9f9;
+        }
+
+        .menu {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 20px 40px;
+            border-bottom: 1px solid #ddd;
+            background: #ffffff;
+        }
+
+        /* TIÊU ĐỀ */
+        .menu-left {
+            font-size: 22px;
+            font-weight: bold;
+            color: #1976d2;
+        }
+
+        /* DANH SÁCH TRÒ CHƠI */
+        .game-list {
+            display: flex;
+            gap: 20px;
+            align-items: center;
+        }
+
+        .game-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 15px;
+            cursor: pointer;
+        }
+
+        .game-item input {
+            width: 16px;
+            height: 16px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+
+<body>
+
+<div th:fragment="menu">
+    <div class="menu">
+        <!-- ĐỔI TÊN Ở ĐÂY -->
+        <div class="menu-left">
+            XỔ SỐ VIETLOTT
+        </div>
+
+        <div class="game-list">
+            <label class="game-item">
+                <input type="checkbox"> lotto-535
+            </label>
+
+            <label class="game-item">
+                <input type="checkbox"> max-3d
+            </label>
+
+            <label class="game-item">
+                <input type="checkbox"> max-3d-pro
+            </label>
+
+            <label class="game-item">
+                <input type="checkbox"> mega-645
+            </label>
+
+            <label class="game-item">
+                <input type="checkbox"> power-655
+            </label>
+        </div>
+    </div>
+
+    <!-- GIỮ NGUYÊN SCRIPT CỦA BẠN -->
+    <script th:inline="javascript">
+        document.addEventListener('DOMContentLoaded', function () {
+            const path = window.location.pathname.replace(/\/+$/, "") || "/";
+            const links = document.querySelectorAll(".menu-item > a");
+
+            links.forEach(a => {
+                const href = a.getAttribute("href");
+                if (!href) return;
+
+                let isActive = false;
+
+                if (path === href || path.startsWith(href + "/")) {
+                    isActive = true;
+                }
+
+                if (isActive) {
+                    a.classList.add("active");
+                }
+            });
+        });
+    </script>
+</div>
+
+</body>
+</html>
