@@ -1,41 +1,194 @@
+<!--<!DOCTYPE html>-->
+<!--<html lang="vi">-->
+<!--<head>-->
+<!--    <meta charset="UTF-8">-->
+<!--    <title>Vietlott System</title>-->
+<!--    <style>-->
+<!--        body { font-family: Arial; background:#f2f2f2; padding:40px }-->
+<!--        h1 { text-align:center }-->
+<!--        .menu {-->
+<!--            display:grid;-->
+<!--            grid-template-columns: repeat(2, 1fr);-->
+<!--            gap:20px;-->
+<!--            max-width:600px;-->
+<!--            margin:auto;-->
+<!--        }-->
+<!--        a {-->
+<!--            text-decoration:none;-->
+<!--            background:#1976d2;-->
+<!--            color:white;-->
+<!--            padding:20px;-->
+<!--            text-align:center;-->
+<!--            font-size:20px;-->
+<!--            border-radius:8px;-->
+<!--        }-->
+<!--        a:hover { background:#0d47a1; }-->
+<!--    </style>-->
+<!--</head>-->
+<!--<body>-->
+
+<!--<h1>🎯 HỆ THỐNG DỰ ĐOÁN VIETLOTT Mới</h1>-->
+
+<!--<div class="menu">-->
+<!--    <a href="lotto-535">Lotto 5/35</a>-->
+<!--    <a href="mega-645">Mega 6/45</a>-->
+<!--    <a href="power-655">Power 6/55</a>-->
+<!--    <a href="max-3d">Max 3D</a>-->
+<!--    <a href="max-3d-pro">Max 3D Pro</a>-->
+<!--</div>-->
+
+<!--</body>-->
+<!--</html>-->
 <!DOCTYPE html>
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
-    <title>Vietlott System</title>
+    <title>Vietlott Random – Shuffle chuẩn</title>
     <style>
-        body { font-family: Arial; background:#f2f2f2; padding:40px }
-        h1 { text-align:center }
-        .menu {
-            display:grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap:20px;
-            max-width:600px;
-            margin:auto;
-        }
-        a {
-            text-decoration:none;
-            background:#1976d2;
-            color:white;
-            padding:20px;
-            text-align:center;
-            font-size:20px;
-            border-radius:8px;
-        }
-        a:hover { background:#0d47a1; }
+        body{font-family:Arial;background:#f4f6f8;margin:0}
+        header{display:flex;background:#1e293b}
+        header div{padding:14px 20px;color:#cbd5e1;cursor:pointer}
+        header .active{background:#2563eb;color:#fff;font-weight:bold}
+        .container{padding:20px}
+        .card{background:#fff;padding:15px;border-radius:8px;box-shadow:0 2px 6px rgba(0,0,0,.1);margin-bottom:20px}
+        button{padding:8px 14px;background:#2563eb;color:#fff;border:0;border-radius:4px;cursor:pointer}
+        input{padding:6px;width:80px}
+        table{width:100%;border-collapse:collapse}
+        th,td{border:1px solid #ccc;padding:6px;text-align:center}
+        th{background:#e5e7eb}
+        .scroll{max-height:260px;overflow-y:auto}
+        .result-main{font-size:18px;font-weight:bold;color:#dc2626;margin-top:10px}
     </style>
 </head>
 <body>
 
-<h1>🎯 HỆ THỐNG DỰ ĐOÁN VIETLOTT Mới</h1>
+<header>
+    <div class="active" onclick="switchGame('535',this)">5/35</div>
+    <div onclick="switchGame('645',this)">6/45</div>
+    <div onclick="switchGame('655',this)">6/55</div>
+    <div onclick="switchGame('3d',this)">Max 3D</div>
+    <div onclick="switchGame('3dp',this)">Max 3D+</div>
+    <div onclick="switchGame('3dpro',this)">Max 3D Pro</div>
+</header>
 
-<div class="menu">
-    <a href="lotto-535">Lotto 5/35</a>
-    <a href="mega-645">Mega 6/45</a>
-    <a href="power-655">Power 6/55</a>
-    <a href="max-3d">Max 3D</a>
-    <a href="max-3d-pro">Max 3D Pro</a>
+<div class="container">
+
+    <div class="card">
+        Số lượt random:
+        <input type="number" id="totalSet" value="50" min="1">
+        <button onclick="generate()">Random</button>
+        <div id="mainResult" class="result-main"></div>
+    </div>
+
+    <div class="card">
+        <h3>📋 Kết quả từng lượt</h3>
+        <div class="scroll">
+            <table id="resultTable"></table>
+        </div>
+    </div>
+
+    <div class="card">
+        <h3>📊 Tần suất xuất hiện</h3>
+        <table id="freqTable"></table>
+    </div>
+
 </div>
 
+<script>
+    let game='535';
+
+    function switchGame(g,el){
+        game=g;
+        document.querySelectorAll('header div').forEach(x=>x.classList.remove('active'));
+        el.classList.add('active');
+        resultTable.innerHTML='';
+        freqTable.innerHTML='';
+        mainResult.innerHTML='';
+    }
+
+    function shufflePick(N,K){
+        let a=[...Array(N).keys()].map(i=>i+1);
+        for(let i=a.length-1;i>0;i--){
+            let j=Math.floor(Math.random()*(i+1));
+            [a[i],a[j]]=[a[j],a[i]];
+        }
+        return a.slice(0,K).sort((a,b)=>a-b);
+    }
+
+    function topKeys(freq,k){
+        return Object.entries(freq)
+            .sort((a,b)=>b[1]-a[1])
+            .slice(0,k)
+            .map(e=>+e[0])
+            .sort((a,b)=>a-b);
+    }
+
+    function generate(){
+        let T=+totalSet.value;
+        if(T<=0) return alert("Nhập số hợp lệ");
+
+        let table='<tr><th>Lượt</th><th>Kết quả</th></tr>';
+        let freq={},freqDB={},freqA={},freqB={};
+        let mainText='';
+
+        if(game==='535'){
+            for(let i=1;i<=35;i++) freq[i]=0;
+            for(let i=1;i<=12;i++) freqDB[i]=0;
+
+            for(let i=1;i<=T;i++){
+                let set=shufflePick(35,5);
+                let db=Math.floor(Math.random()*12)+1;
+                set.forEach(x=>freq[x]++);
+                freqDB[db]++;
+                table+=`<tr><td>${i}</td><td>${set.join(' - ')} | ĐB: ${db}</td></tr>`;
+            }
+
+            let main=topKeys(freq,5);
+            let dbTop=topKeys(freqDB,1)[0];
+            mainText=`🎯 KẾT QUẢ ĐỀ XUẤT: ${main.join(' - ')} | ĐB: ${dbTop}`;
+        }
+
+        else if(game==='645' || game==='655'){
+            let N=game==='645'?45:55;
+            for(let i=1;i<=N;i++) freq[i]=0;
+
+            for(let i=1;i<=T;i++){
+                let set=shufflePick(N,6);
+                set.forEach(x=>freq[x]++);
+                table+=`<tr><td>${i}</td><td>${set.join(' - ')}</td></tr>`;
+            }
+
+            let main=topKeys(freq,6);
+            mainText=`🎯 KẾT QUẢ ĐỀ XUẤT: ${main.join(' - ')}`;
+        }
+
+        else{
+            for(let i=0;i<=9;i++){freqA[i]=0;freqB[i]=0;}
+
+            for(let i=1;i<=T;i++){
+                let a=[0,0,0].map(()=>Math.floor(Math.random()*10));
+                let b=[0,0,0].map(()=>Math.floor(Math.random()*10));
+                a.forEach(x=>freqA[x]++);
+                if(game!=='3d') b.forEach(x=>freqB[x]++);
+                table+=`<tr><td>${i}</td><td>${a.join('')}${game==='3d'?'':' - '+b.join('')}</td></tr>`;
+            }
+
+            let A=topKeys(freqA,3);
+            let B=game==='3d'?[]:topKeys(freqB,3);
+            mainText='🎯 KẾT QUẢ ĐỀ XUẤT: '+A.join('')+(B.length?' - '+B.join(''):'');
+        }
+
+        resultTable.innerHTML=table;
+        mainResult.innerHTML=mainText;
+
+        let fHTML='<tr><th>Số</th><th>Lần</th></tr>';
+        let fsrc=game.includes('3d')?freqA:freq;
+        Object.keys(fsrc).forEach(k=>{
+            fHTML+=`<tr><td>${k}</td><td>${fsrc[k]}</td></tr>`;
+        });
+        freqTable.innerHTML=fHTML;
+    }
+</script>
 </body>
 </html>
+
