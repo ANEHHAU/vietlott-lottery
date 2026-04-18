@@ -2,125 +2,205 @@
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
-    <title>Mega 6/45</title>
-
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mega 6/45 AI Predictor</title>
     <style>
+        :root { --primary: #f97316; }
         body {
-            font-family: Arial, sans-serif;
-            background: #f5f6fa;
-            margin: 0;
-            padding: 30px;
-            color: #222;
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            background: linear-gradient(135deg, #0f172a, #1e2937);
+            color: #e2e8f0;
+            margin: 0; padding: 20px; min-height: 100vh;
         }
+        h1 { text-align: center; font-size: 2.8rem; margin-bottom: 10px; text-shadow: 0 0 20px var(--primary); }
+        .subtitle { text-align: center; color: #64748b; margin-bottom: 30px; }
 
-        h1 {
-            text-align: center;
-            margin-bottom: 20px;
+        .container { display: flex; gap: 25px; max-width: 1400px; margin: 0 auto; }
+        .left {
+            width: 48%; background: rgba(15,23,42,0.95); border-radius: 20px;
+            padding: 20px; height: 720px; overflow-y: auto;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.6); border: 1px solid #334155;
         }
+        .round {
+            background: #1e2937; margin-bottom: 10px; padding: 12px;
+            border-radius: 10px; border-left: 5px solid #334155; font-size: 0.9rem;
+        }
+        .idx0 { color: #ef4444; } .idx1 { color: #f97316; } .idx2 { color: #eab308; }
+        .idx3 { color: #22c55e; } .idx4 { color: #3b82f6; } .idx5 { color: #a855f7; }
 
+        .right { width: 52%; display: flex; flex-direction: column; gap: 25px; }
         .box {
-            background: #fff;
-            border-radius: 8px;
-            padding: 16px;
-            margin-bottom: 20px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            background: white; color: #0f172a; border-radius: 20px;
+            padding: 25px; box-shadow: 0 10px 30px rgba(0,0,0,0.3);
         }
 
-        .numbers span {
-            display: inline-block;
-            background: #2563eb;
-            color: #fff;
-            padding: 8px 12px;
-            margin: 4px;
+        .result-container { display: flex; justify-content: center; gap: 14px; flex-wrap: wrap; }
+        .ball {
+            width: 68px; height: 68px;
+            background: linear-gradient(145deg, #f97316, #ea580c);
+            color: white; font-size: 1.7rem; font-weight: bold;
+            display: flex; align-items: center; justify-content: center;
             border-radius: 50%;
-            font-weight: bold;
+            box-shadow: 0 8px 20px rgba(249,115,22,0.5), inset 0 4px 10px rgba(255,255,255,0.3);
+            animation: popIn 0.6s ease forwards;
         }
+        @keyframes popIn { 0%{transform:scale(0.3)} 100%{transform:scale(1)} }
 
         button {
-            padding: 10px 16px;
-            background: #16a34a;
-            color: white;
-            border: none;
-            border-radius: 6px;
-            cursor: pointer;
+            display: block; margin: 0 auto 30px; padding: 16px 48px;
+            font-size: 1.4rem; font-weight: bold;
+            background: linear-gradient(90deg, #f97316, #fdba74);
+            color: white; border: none; border-radius: 50px;
+            cursor: pointer; box-shadow: 0 0 30px #f97316; transition: all 0.3s;
+        }
+        button:hover { transform: translateY(-4px); box-shadow: 0 0 50px #f97316; }
+        button:disabled { opacity: 0.7; cursor: not-allowed; }
+
+        .progress-container { margin: 15px 0; }
+        .progress-bar { height: 12px; background: #334155; border-radius: 9999px; overflow: hidden; }
+        .progress-fill {
+            height: 100%; width: 0%;
+            background: linear-gradient(90deg, #f97316, #fdba74);
+            transition: width 0.3s;
         }
 
+        table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
+        th { background: #fff7ed; padding: 6px 10px; text-align: left; color: #ea580c; }
+        td { padding: 5px 10px; border-bottom: 1px solid #e2e8f0; }
+        .freq-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
     </style>
 </head>
-
 <body>
 
-<h1>🎯 Mega 6/45</h1>
-<button onclick="location.href='/'">← Quay về trang chủ</button>
+<h1>🍀 Mega 6/45 AI Predictor</h1>
+<p class="subtitle">Mô phỏng AI realtime • 6 số từ 1–45</p>
 
+<button id="generateBtn">🚀 TẠO BỘ SỐ MAY MẮN</button>
 
-<div class="box">
-    <h3>Kết quả mới nhất</h3>
-    <div id="latest">Chưa có dữ liệu</div>
+<div class="container">
+    <div class="left" id="rounds">
+        <div style="margin-bottom:15px">
+            <h3>📊 Quá trình mô phỏng AI</h3>
+            <span id="roundCount" style="background:#f97316;color:white;padding:4px 12px;border-radius:30px;font-size:0.9rem;font-weight:bold;">0 vòng</span>
+        </div>
+    </div>
+
+    <div class="right">
+        <div class="box">
+            <h3 style="margin:0 0 20px 0;text-align:center;color:#0f172a;">Kết quả dự đoán</h3>
+            <div id="result" class="result-container"></div>
+        </div>
+
+        <div class="box">
+            <h3 style="margin:0 0 15px 0;color:#0f172a;">Tần suất theo vị trí</h3>
+            <div id="tables" class="freq-grid"></div>
+        </div>
+    </div>
 </div>
 
-<div class="box">
-    <h3>Dự đoán</h3>
-    <button onclick="generate()">Tạo số</button>
-    <div id="predict" class="numbers">Chưa có dữ liệu</div>
-</div>
-
-<div class="box">
-    <h3>Lịch sử</h3>
-    <ul id="history">
-        <li>Chưa có dữ liệu</li>
-    </ul>
-</div>
-
-<div class="box">
-    <h3>Phân tích</h3>
-    <div id="analysis">Chưa có dữ liệu</div>
+<div style="max-width:1400px;margin:20px auto;background:#1e2937;border-radius:20px;padding:20px;color:white">
+    <div class="progress-container">
+        <div style="display:flex;justify-content:space-between;margin-bottom:6px">
+            <small>Tiến độ mô phỏng</small>
+            <span id="percentText">0%</span>
+        </div>
+        <div class="progress-bar"><div id="progressFill" class="progress-fill"></div></div>
+    </div>
 </div>
 
 <script>
-    let historyData = [];
+    const btn = document.getElementById("generateBtn");
+    let eventSource = null;
+
+    function resetUI() {
+        document.getElementById("rounds").innerHTML = `
+      <div style="margin-bottom:15px">
+        <h3>📊 Quá trình mô phỏng AI</h3>
+        <span id="roundCount" style="background:#f97316;color:white;padding:4px 12px;border-radius:30px;font-size:0.9rem;font-weight:bold;">0 vòng</span>
+      </div>`;
+        document.getElementById("result").innerHTML = "";
+        document.getElementById("tables").innerHTML = "";
+        document.getElementById("progressFill").style.width = "0%";
+        document.getElementById("percentText").textContent = "0%";
+    }
 
     function generate() {
-        const nums = generateNumbers();
-        document.getElementById("predict").innerHTML =
-            nums.map(n => `<span>${n}</span>`).join("");
+        btn.disabled = true;
+        btn.innerHTML = `🔄 ĐANG MÔ PHỎNG...`;
+        resetUI();
 
-        historyData.unshift(nums);
-        renderHistory();
-        analyze();
-    }
+        eventSource = new EventSource("/api/mega-645/predict");
 
-    function generateNumbers() {
-        const set = new Set();
-        while (set.size < 6) {
-            set.add(Math.floor(Math.random() * 45) + 1);
-        }
-        return [...set].sort((a, b) => a - b);
-    }
+        eventSource.onmessage = (e) => console.log("SSE default:", e.data);
 
-    function renderHistory() {
-        const ul = document.getElementById("history");
-        ul.innerHTML = "";
-        historyData.slice(0, 10).forEach(row => {
-            const li = document.createElement("li");
-            li.textContent = row.join(" - ");
-            ul.appendChild(li);
+        eventSource.addEventListener("round", (e) => {
+            const r = JSON.parse(e.data);
+            const div = document.createElement("div");
+            div.className = "round";
+
+            let nums = r.numbers.map((n, i) =>
+                `<span class="idx${i}">[${i}]<b>${String(n).padStart(2,'0')}</b></span>`
+            ).join(' ');
+
+            div.innerHTML = `<b>Vòng ${r.round}</b> &nbsp; ${nums}`;
+            const roundsDiv = document.getElementById("rounds");
+            roundsDiv.appendChild(div);
+            roundsDiv.scrollTop = roundsDiv.scrollHeight;
+            document.getElementById("roundCount").textContent = r.round + " vòng";
         });
+
+        eventSource.addEventListener("progress", (e) => {
+            const p = parseInt(e.data);
+            document.getElementById("progressFill").style.width = p + "%";
+            document.getElementById("percentText").textContent = p + "%";
+        });
+
+        eventSource.addEventListener("ping", () => {});
+
+        eventSource.addEventListener("complete", (e) => {
+            const data = JSON.parse(e.data);
+            const nums = data.result;
+
+            document.getElementById("result").innerHTML =
+                nums.map(n => `<div class="ball">${String(n).padStart(2,'0')}</div>`).join('');
+
+            let gridHTML = "";
+            for (let i = 0; i < 6; i++) {
+                const freq = data.freq[i];
+                const entries = Object.entries(freq)
+                    .map(([k,v]) => [parseInt(k), v])
+                    .sort((a,b) => a[0]-b[0]);
+
+                gridHTML += `
+          <div>
+            <h4 style="margin:0 0 8px;color:#0f172a;font-size:0.9rem">
+              Vị trí ${i} <span style="color:#f97316">(→ ${String(nums[i]).padStart(2,'0')})</span>
+            </h4>
+            <table>
+              <tr><th>Số</th><th>Lần</th></tr>
+              ${entries.map(([num, count]) => `
+                <tr style="${num === nums[i] ? 'background:#fff7ed;font-weight:bold' : ''}">
+                  <td>${String(num).padStart(2,'0')}</td><td>${count}</td>
+                </tr>`).join('')}
+            </table>
+          </div>`;
+            }
+            document.getElementById("tables").innerHTML = gridHTML;
+
+            eventSource.close();
+            btn.disabled = false;
+            btn.innerHTML = `🚀 TẠO BỘ SỐ MAY MẮN`;
+        });
+
+        eventSource.onerror = () => {
+            eventSource.close();
+            alert("❌ Mất kết nối SSE");
+            btn.disabled = false;
+            btn.innerHTML = `🚀 TẠO BỘ SỐ MAY MẮN`;
+        };
     }
 
-    function analyze() {
-        const freq = {};
-        historyData.flat().forEach(n => freq[n] = (freq[n] || 0) + 1);
-
-        const hot = Object.entries(freq)
-            .sort((a, b) => b[1] - a[1])
-            .slice(0, 3)
-            .map(e => e[0]);
-
-        document.getElementById("analysis").innerText =
-            "Số xuất hiện nhiều nhất: " + hot.join(", ");
-    }
+    btn.addEventListener("click", generate);
 </script>
-
 </body>
 </html>

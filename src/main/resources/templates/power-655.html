@@ -2,125 +2,176 @@
 <html lang="vi">
 <head>
   <meta charset="UTF-8">
-  <title>Power 6/55</title>
-
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Power 6/55 AI Predictor</title>
   <style>
+    :root { --primary: #22c55e; }
     body {
-      font-family: Arial, sans-serif;
-      background: #f5f6fa;
-      margin: 0;
-      padding: 30px;
-      color: #222;
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      background: linear-gradient(135deg, #0f172a, #1e2937);
+      color: #e2e8f0;
+      margin: 0; padding: 20px; min-height: 100vh;
     }
+    h1 { text-align: center; font-size: 2.8rem; margin-bottom: 10px; text-shadow: 0 0 20px var(--primary); }
+    .subtitle { text-align: center; color: #64748b; margin-bottom: 30px; }
 
-    h1 {
-      text-align: center;
-      margin-bottom: 20px;
-    }
+    .container { display: flex; gap: 25px; max-width: 1400px; margin: 0 auto; }
+    .left { width: 48%; background: rgba(15,23,42,0.95); border-radius: 20px; padding: 20px; height: 720px; overflow-y: auto; box-shadow: 0 10px 30px rgba(0,0,0,0.6); border: 1px solid #334155; }
+    .round { background: #1e2937; margin-bottom: 12px; padding: 14px; border-radius: 12px; border-left: 5px solid #64748b; }
+    .idx0 { color: #ef4444; } .idx1 { color: #f97316; } .idx2 { color: #eab308; }
+    .idx3 { color: #22c55e; } .idx4 { color: #3b82f6; } .idx5 { color: #a855f7; }
 
-    .box {
-      background: #fff;
-      border-radius: 8px;
-      padding: 16px;
-      margin-bottom: 20px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
-    }
+    .right { width: 52%; display: flex; flex-direction: column; gap: 25px; }
+    .box { background: white; color: #0f172a; border-radius: 20px; padding: 25px; box-shadow: 0 10px 30px rgba(0,0,0,0.3); }
 
-    .numbers span {
-      display: inline-block;
-      background: #2563eb;
-      color: #fff;
-      padding: 8px 12px;
-      margin: 4px;
-      border-radius: 50%;
-      font-weight: bold;
+    .result-container { display: flex; justify-content: center; gap: 18px; flex-wrap: wrap; }
+    .ball {
+      width: 68px; height: 68px;
+      background: linear-gradient(145deg, #22c55e, #16a34a);
+      color: white; font-size: 1.8rem; font-weight: bold;
+      display: flex; align-items: center; justify-content: center;
+      border-radius: 50%; box-shadow: 0 8px 20px rgba(34,197,94,0.5), inset 0 4px 10px rgba(255,255,255,0.8);
+      animation: popIn 0.6s ease forwards;
     }
+    @keyframes popIn { 0%{transform:scale(0.3)} 100%{transform:scale(1)} }
 
     button {
-      padding: 10px 16px;
-      background: #16a34a;
-      color: white;
-      border: none;
-      border-radius: 6px;
-      cursor: pointer;
+      display: block; margin: 0 auto 30px; padding: 16px 48px; font-size: 1.4rem; font-weight: bold;
+      background: linear-gradient(90deg, #22c55e, #86efac); color: #0f172a; border: none; border-radius: 50px;
+      cursor: pointer; box-shadow: 0 0 30px #22c55e; transition: all 0.3s;
     }
+    button:hover { transform: translateY(-4px); box-shadow: 0 0 50px #22c55e; }
+    button:disabled { opacity: 0.7; cursor: not-allowed; }
 
+    .progress-container { margin: 15px 0; }
+    .progress-bar { height: 12px; background: #334155; border-radius: 9999px; overflow: hidden; }
+    .progress-fill { height: 100%; background: linear-gradient(90deg, #22c55e, #86efac); width: 0%; transition: width 0.3s; }
   </style>
 </head>
-
 <body>
 
-<h1>🎯 Power 6/55</h1>
-<button onclick="location.href='/'">← Quay về trang chủ</button>
+<h1>🎟️ Power 6/55 AI Predictor</h1>
+<p class="subtitle">Trí tuệ nhân tạo mô phỏng realtime • Xem từng vòng quay ngay lập tức</p>
 
+<button id="generateBtn">🚀 TẠO BỘ SỐ MAY MẮN</button>
 
-<div class="box">
-  <h3>Kết quả mới nhất</h3>
-  <div id="latest">Chưa có dữ liệu</div>
+<div class="container">
+  <div class="left" id="rounds">
+    <div class="left-header" style="margin-bottom:15px">
+      <h3>📊 Quá trình mô phỏng AI</h3>
+      <span id="roundCount" style="background:#22c55e;color:#0f172a;padding:4px 12px;border-radius:30px;font-size:0.9rem;font-weight:bold;">0 vòng</span>
+    </div>
+  </div>
+
+  <div class="right">
+    <div class="box">
+      <h3 style="margin:0 0 20px 0; text-align:center; color:#0f172a;">Kết quả dự đoán</h3>
+      <div id="result" class="result-container"></div>
+    </div>
+
+    <div class="box">
+      <h3 style="margin:0 0 15px 0; color:#0f172a;">Tần suất theo vị trí</h3>
+      <div id="tables"></div>
+    </div>
+  </div>
 </div>
 
-<div class="box">
-  <h3>Dự đoán</h3>
-  <button onclick="generate()">Tạo số</button>
-  <div id="predict" class="numbers">Chưa có dữ liệu</div>
-</div>
-
-<div class="box">
-  <h3>Lịch sử</h3>
-  <ul id="history">
-    <li>Chưa có dữ liệu</li>
-  </ul>
-</div>
-
-<div class="box">
-  <h3>Phân tích</h3>
-  <div id="analysis">Chưa có dữ liệu</div>
+<div class="box" style="max-width:1400px;margin:20px auto;background:#1e2937;color:white">
+  <div class="progress-container">
+    <div style="display:flex;justify-content:space-between"><small>Tiến độ thu thập số hiếm</small><span id="percentText">0%</span></div>
+    <div class="progress-bar"><div id="progressFill" class="progress-fill"></div></div>
+  </div>
 </div>
 
 <script>
-  let historyData = [];
+  const btn = document.getElementById("generateBtn");
+  let eventSource = null;
 
-  function generate() {
-    const nums = generateNumbers();
-    document.getElementById("predict").innerHTML =
-            nums.map(n => `<span>${n}</span>`).join("");
 
-    historyData.unshift(nums);
-    renderHistory();
-    analyze();
-  }
 
-  function generateNumbers() {
-    const set = new Set();
-    while (set.size < 6) {
-      set.add(Math.floor(Math.random() * 55) + 1);
-    }
-    return [...set].sort((a, b) => a - b);
-  }
 
-  function renderHistory() {
-    const ul = document.getElementById("history");
-    ul.innerHTML = "";
-    historyData.slice(0, 10).forEach(row => {
-      const li = document.createElement("li");
-      li.textContent = row.join(" - ");
-      ul.appendChild(li);
+  async function generate() {
+    btn.disabled = true;
+    btn.innerHTML = `🔄 ĐANG MÔ PHỎNG...`;
+
+    // Reset UI
+    document.getElementById("rounds").innerHTML = `
+      <div class="left-header" style="margin-bottom:15px">
+        <h3>📊 Quá trình mô phỏng AI</h3>
+        <span id="roundCount" style="background:#22c55e;color:#0f172a;padding:4px 12px;border-radius:30px;font-size:0.9rem;font-weight:bold;">0 vòng</span>
+      </div>`;
+    document.getElementById("result").innerHTML = "";
+    document.getElementById("tables").innerHTML = "";
+    document.getElementById("progressFill").style.width = "0%";
+    document.getElementById("percentText").textContent = "0%";
+
+    // ✅ Khởi tạo trước
+    eventSource = new EventSource("/api/power-655/predict");
+
+    eventSource.onmessage = (event) => {
+      console.log("SSE default:", event.data);
+    };
+
+    eventSource.addEventListener("round", (e) => {
+      const r = JSON.parse(e.data);
+      const div = document.createElement("div");
+      div.className = "round";
+      div.innerHTML = `<b>Vòng ${r.round}</b><br>`;
+      r.numbers.forEach((num, i) => {
+        const padded = num.toString().padStart(2, '0');
+        div.innerHTML += `<span class="idx${i}">[${i}] ${padded}</span> `;
+      });
+      const roundsDiv = document.getElementById("rounds");
+      roundsDiv.appendChild(div);
+      roundsDiv.scrollTop = roundsDiv.scrollHeight;
+      document.getElementById("roundCount").textContent = r.round + " vòng";
     });
+
+    eventSource.addEventListener("progress", (e) => {
+      const percent = parseInt(e.data);
+      document.getElementById("progressFill").style.width = percent + "%";
+      document.getElementById("percentText").textContent = percent + "%";
+    });
+
+    // ✅ Đúng chỗ: sau khi đã new EventSource
+    eventSource.addEventListener("ping", () => {});
+
+    eventSource.addEventListener("complete", (e) => {
+      const data = JSON.parse(e.data);
+
+      let html = "";
+      data.result.forEach(n => {
+        html += `<div class="ball">${n.toString().padStart(2,'0')}</div>`;
+      });
+      document.getElementById("result").innerHTML = html;
+
+      let tableHTML = "";
+      for (let i = 0; i < 6; i++) {
+        const freq = data.freq[i];
+        const entries = Object.entries(freq).sort((a,b)=>a[0]-b[0]);
+        tableHTML += `<h4 style="margin:20px 0 10px;color:#0f172a">Vị trí ${i}</h4><table>`;
+        tableHTML += `<tr><th>Số</th><th>Lần xuất hiện</th></tr>`;
+        entries.forEach(([num,count]) => {
+          tableHTML += `<tr><td><b>${num.toString().padStart(2,'0')}</b></td><td>${count}</td></tr>`;
+        });
+        tableHTML += `</table>`;
+      }
+      document.getElementById("tables").innerHTML = tableHTML;
+
+      eventSource.close();
+      btn.disabled = false;
+      btn.innerHTML = `🚀 TẠO BỘ SỐ MAY MẮN`;
+    });
+
+    eventSource.onerror = () => {
+      eventSource.close();
+      alert("❌ Mất kết nối SSE");
+      btn.disabled = false;
+      btn.innerHTML = `🚀 TẠO BỘ SỐ MAY MẮN`;
+    };
   }
 
-  function analyze() {
-    const count = {};
-    historyData.flat().forEach(n => count[n] = (count[n] || 0) + 1);
-
-    const top = Object.entries(count)
-            .sort((a, b) => b[1] - a[1])
-            .slice(0, 3)
-            .map(x => x[0]);
-
-    document.getElementById("analysis").innerText =
-            "Số xuất hiện nhiều nhất: " + top.join(", ");
-  }
+  btn.addEventListener("click", generate);
 </script>
-
 </body>
 </html>

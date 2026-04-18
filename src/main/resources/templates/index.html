@@ -2,39 +2,211 @@
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
-    <title>Vietlott System</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vietlott AI System</title>
     <style>
-        body { font-family: Arial; background:#f2f2f2; padding:40px }
-        h1 { text-align:center }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            background: linear-gradient(135deg, #0f172a, #1e2937);
+            min-height: 100vh;
+            padding: 40px 20px;
+            color: #e2e8f0;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 50px;
+        }
+        .header h1 {
+            font-size: 2.8rem;
+            font-weight: bold;
+            margin-bottom: 10px;
+            background: linear-gradient(90deg, #22c55e, #3b82f6, #a855f7, #f97316, #e11d48);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .header p {
+            color: #64748b;
+            font-size: 1rem;
+        }
+
         .menu {
-            display:grid;
+            display: grid;
             grid-template-columns: repeat(2, 1fr);
-            gap:20px;
-            max-width:600px;
-            margin:auto;
+            gap: 20px;
+            max-width: 780px;
+            margin: 0 auto;
         }
-        a {
-            text-decoration:none;
-            background:#1976d2;
-            color:white;
-            padding:20px;
-            text-align:center;
-            font-size:20px;
-            border-radius:8px;
+
+        /* Card chung */
+        .card {
+            text-decoration: none;
+            border-radius: 20px;
+            padding: 28px 24px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            position: relative;
+            overflow: hidden;
+            transition: transform 0.3s, box-shadow 0.3s;
+            border: 1px solid rgba(255,255,255,0.08);
         }
-        a:hover { background:#0d47a1; }
+        .card:hover {
+            transform: translateY(-6px);
+        }
+        .card::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: rgba(255,255,255,0.04);
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+        .card:hover::before { opacity: 1; }
+
+        .card-icon {
+            font-size: 2.4rem;
+            line-height: 1;
+        }
+        .card-name {
+            font-size: 1.4rem;
+            font-weight: bold;
+            color: white;
+        }
+        .card-desc {
+            font-size: 0.85rem;
+            opacity: 0.75;
+            color: white;
+            line-height: 1.4;
+        }
+        .card-badge {
+            position: absolute;
+            top: 16px; right: 16px;
+            font-size: 0.75rem;
+            font-weight: bold;
+            padding: 4px 10px;
+            border-radius: 20px;
+            background: rgba(255,255,255,0.2);
+            color: white;
+        }
+        .card-arrow {
+            margin-top: 8px;
+            font-size: 0.9rem;
+            color: rgba(255,255,255,0.6);
+        }
+
+        /* Màu từng loại */
+        .card-power {
+            background: linear-gradient(135deg, #14532d, #166534);
+            box-shadow: 0 10px 30px rgba(34,197,94,0.25);
+        }
+        .card-power:hover { box-shadow: 0 16px 40px rgba(34,197,94,0.4); }
+
+        .card-mega {
+            background: linear-gradient(135deg, #7c2d12, #9a3412);
+            box-shadow: 0 10px 30px rgba(249,115,22,0.25);
+        }
+        .card-mega:hover { box-shadow: 0 16px 40px rgba(249,115,22,0.4); }
+
+        .card-lotto {
+            background: linear-gradient(135deg, #881337, #9f1239);
+            box-shadow: 0 10px 30px rgba(225,29,72,0.25);
+        }
+        .card-lotto:hover { box-shadow: 0 16px 40px rgba(225,29,72,0.4); }
+
+        .card-3d {
+            background: linear-gradient(135deg, #4a1d96, #5b21b6);
+            box-shadow: 0 10px 30px rgba(168,85,247,0.25);
+        }
+        .card-3d:hover { box-shadow: 0 16px 40px rgba(168,85,247,0.4); }
+
+        .card-3dpro {
+            background: linear-gradient(135deg, #1e3a5f, #1d4ed8);
+            box-shadow: 0 10px 30px rgba(59,130,246,0.25);
+        }
+        .card-3dpro:hover { box-shadow: 0 16px 40px rgba(59,130,246,0.4); }
+
+        /* Card Power 655 chiếm full width hàng đầu */
+        .card-full {
+            grid-column: 1 / -1;
+            flex-direction: row;
+            align-items: center;
+            gap: 20px;
+            padding: 32px 28px;
+        }
+        .card-full .card-icon { font-size: 3rem; }
+        .card-full .card-name { font-size: 1.7rem; }
+        .card-full .card-desc { font-size: 0.9rem; }
+        .card-full .card-text { flex: 1; }
+
+        .footer {
+            text-align: center;
+            margin-top: 50px;
+            color: #334155;
+            font-size: 0.85rem;
+        }
     </style>
 </head>
 <body>
 
-<h1>🎯 HỆ THỐNG DỰ ĐOÁN VIETLOTT Mới</h1>
+<div class="header">
+    <h1>🎯 HỆ THỐNG DỰ ĐOÁN VIETLOTT</h1>
+    <p>Mô phỏng AI realtime • Phân tích tần suất • Dự đoán thông minh</p>
+</div>
 
 <div class="menu">
-    <a href="lotto-535">Lotto 5/35</a>
-    <a href="mega-645">Mega 6/45</a>
-    <a href="power-655">Power 6/55</a>
-    <a href="max-3d">Max 3D</a>
-    <a href="max-3d-pro">Max 3D Pro</a>
+
+    <!-- Power 6/55 - nổi bật nhất, full width -->
+    <a href="power-655" class="card card-power card-full">
+        <div class="card-icon">🟢</div>
+        <div class="card-text">
+            <div class="card-name">Power 6/55</div>
+            <div class="card-desc">Chọn 6 số từ 1–55 • Jackpot cao nhất • Mô phỏng hàng nghìn vòng</div>
+            <div class="card-arrow">Bắt đầu dự đoán →</div>
+        </div>
+        <div class="card-badge">HOT</div>
+    </a>
+
+    <!-- Mega 6/45 -->
+    <a href="mega-645" class="card card-mega">
+        <div class="card-icon">🍀</div>
+        <div class="card-name">Mega 6/45</div>
+        <div class="card-desc">6 số từ 1–45 • Xổ thứ 3, 5, 7</div>
+        <div class="card-arrow">Dự đoán →</div>
+        <div class="card-badge">PHỔ BIẾN</div>
+    </a>
+
+    <!-- Lotto 5/35 -->
+    <a href="lotto-535" class="card card-lotto">
+        <div class="card-icon">🎰</div>
+        <div class="card-name">Lotto 5/35</div>
+        <div class="card-desc">5 số chính (1–35) + 1 số đặc biệt (1–12)</div>
+        <div class="card-arrow">Dự đoán →</div>
+    </a>
+
+    <!-- Max 3D -->
+    <a href="max-3d" class="card card-3d">
+        <div class="card-icon">🎯</div>
+        <div class="card-name">Max 3D</div>
+        <div class="card-desc">3 chữ số từ 0–9 • Xổ hàng ngày</div>
+        <div class="card-arrow">Dự đoán →</div>
+    </a>
+
+    <!-- Max 3D Pro -->
+    <a href="max-3d-pro" class="card card-3dpro">
+        <div class="card-icon">🎲</div>
+        <div class="card-name">Max 3D Pro</div>
+        <div class="card-desc">6 chữ số từ 0–9 • 2 bộ số • Trúng nhiều cách hơn</div>
+        <div class="card-arrow">Dự đoán →</div>
+        <div class="card-badge">MỚI</div>
+    </a>
+
+</div>
+
+<div class="footer">
+    Chỉ mang tính chất giải trí • Không đảm bảo trúng thưởng
 </div>
 
 </body>

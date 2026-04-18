@@ -2,134 +2,258 @@
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
-    <title>Lotto 5/35</title>
-
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lotto 5/35 AI Predictor</title>
     <style>
+        :root { --primary: #e11d48; }
         body {
-            font-family: Arial, sans-serif;
-            background: #f5f6fa;
-            margin: 0;
-            padding: 30px;
-            color: #222;
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            background: linear-gradient(135deg, #0f172a, #1e2937);
+            color: #e2e8f0;
+            margin: 0; padding: 20px; min-height: 100vh;
         }
+        h1 { text-align: center; font-size: 2.8rem; margin-bottom: 10px; text-shadow: 0 0 20px var(--primary); }
+        .subtitle { text-align: center; color: #64748b; margin-bottom: 30px; }
 
-        h1 {
-            text-align: center;
-            margin-bottom: 20px;
+        .container { display: flex; gap: 25px; max-width: 1400px; margin: 0 auto; }
+        .left {
+            width: 48%; background: rgba(15,23,42,0.95); border-radius: 20px;
+            padding: 20px; height: 720px; overflow-y: auto;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.6); border: 1px solid #334155;
         }
+        .round {
+            background: #1e2937; margin-bottom: 10px; padding: 12px;
+            border-radius: 10px; border-left: 5px solid #334155; font-size: 0.9rem;
+        }
+        .idx0 { color: #ef4444; } .idx1 { color: #f97316; } .idx2 { color: #eab308; }
+        .idx3 { color: #22c55e; } .idx4 { color: #3b82f6; }
+        .idx5 { color: #fbbf24; font-weight: bold; } /* số đặc biệt màu vàng */
 
+        .right { width: 52%; display: flex; flex-direction: column; gap: 25px; }
         .box {
-            background: #fff;
-            border-radius: 8px;
-            padding: 16px;
-            margin-bottom: 20px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            background: white; color: #0f172a; border-radius: 20px;
+            padding: 25px; box-shadow: 0 10px 30px rgba(0,0,0,0.3);
         }
 
-        .numbers span {
-            display: inline-block;
-            background: #2563eb;
-            color: #fff;
-            padding: 8px 12px;
-            margin: 4px;
+        /* Kết quả: 5 số chính + dấu phân cách + 1 số đặc biệt */
+        .result-container {
+            display: flex; justify-content: center;
+            align-items: center; gap: 12px; flex-wrap: wrap;
+        }
+        .ball {
+            width: 64px; height: 64px;
+            background: linear-gradient(145deg, #e11d48, #9f1239);
+            color: white; font-size: 1.6rem; font-weight: bold;
+            display: flex; align-items: center; justify-content: center;
             border-radius: 50%;
-            font-weight: bold;
+            box-shadow: 0 8px 20px rgba(225,29,72,0.5), inset 0 4px 10px rgba(255,255,255,0.3);
+            animation: popIn 0.6s ease forwards;
+        }
+        .ball-special {
+            width: 72px; height: 72px;
+            background: linear-gradient(145deg, #f59e0b, #d97706);
+            color: white; font-size: 1.8rem; font-weight: bold;
+            display: flex; align-items: center; justify-content: center;
+            border-radius: 50%;
+            box-shadow: 0 8px 24px rgba(245,158,11,0.6), inset 0 4px 10px rgba(255,255,255,0.3);
+            animation: popIn 0.8s ease forwards;
+        }
+        .separator {
+            font-size: 2rem; color: #94a3b8; font-weight: bold; line-height: 1;
+        }
+        @keyframes popIn { 0%{transform:scale(0.3)} 100%{transform:scale(1)} }
+
+        .special-label {
+            text-align: center; margin-top: 12px;
+            font-size: 0.85rem; color: #64748b;
         }
 
         button {
-            padding: 10px 16px;
-            background: #16a34a;
-            color: white;
-            border: none;
-            border-radius: 6px;
-            cursor: pointer;
+            display: block; margin: 0 auto 30px; padding: 16px 48px;
+            font-size: 1.4rem; font-weight: bold;
+            background: linear-gradient(90deg, #e11d48, #fb7185);
+            color: white; border: none; border-radius: 50px;
+            cursor: pointer; box-shadow: 0 0 30px #e11d48; transition: all 0.3s;
+        }
+        button:hover { transform: translateY(-4px); box-shadow: 0 0 50px #e11d48; }
+        button:disabled { opacity: 0.7; cursor: not-allowed; }
+
+        .progress-bar { height: 12px; background: #334155; border-radius: 9999px; overflow: hidden; }
+        .progress-fill {
+            height: 100%; width: 0%;
+            background: linear-gradient(90deg, #e11d48, #fb7185);
+            transition: width 0.3s;
         }
 
-        ul {
-            padding-left: 20px;
-        }
-
+        table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
+        th { background: #fff1f2; padding: 6px 10px; text-align: left; color: #e11d48; }
+        td { padding: 5px 10px; border-bottom: 1px solid #e2e8f0; }
+        .freq-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+        .special-freq { border: 2px solid #f59e0b; border-radius: 12px; padding: 12px; }
     </style>
 </head>
-
 <body>
 
-<h1>🎯 Lotto 5/35</h1>
-<button onclick="location.href='/'">← Quay về trang chủ</button>
+<h1>🎰 Lotto 5/35 AI Predictor</h1>
+<p class="subtitle">Mô phỏng AI realtime • 5 số chính (1–35) + 1 số đặc biệt (1–12)</p>
 
+<button id="generateBtn">🚀 TẠO BỘ SỐ MAY MẮN</button>
 
-<div class="box">
-    <h3>Kết quả mới nhất</h3>
-    <div id="latest">Chưa có dữ liệu</div>
+<div class="container">
+    <div class="left" id="rounds">
+        <div style="margin-bottom:15px">
+            <h3>📊 Quá trình mô phỏng AI</h3>
+            <span id="roundCount" style="background:#e11d48;color:white;padding:4px 12px;border-radius:30px;font-size:0.9rem;font-weight:bold;">0 vòng</span>
+        </div>
+    </div>
+
+    <div class="right">
+        <div class="box">
+            <h3 style="margin:0 0 20px 0;text-align:center;color:#0f172a;">Kết quả dự đoán</h3>
+            <div id="result" class="result-container"></div>
+            <p class="special-label">⚪ Số chính &nbsp;|&nbsp; 🟡 Số đặc biệt (1–12)</p>
+        </div>
+
+        <div class="box">
+            <h3 style="margin:0 0 15px 0;color:#0f172a;">Tần suất theo vị trí</h3>
+            <div id="tables"></div>
+        </div>
+    </div>
 </div>
 
-<div class="box">
-    <h3>Dự đoán</h3>
-    <button onclick="generate()">Tạo số</button>
-    <div id="predict" class="numbers">Chưa có dữ liệu</div>
-</div>
-
-<div class="box">
-    <h3>Lịch sử dự đoán</h3>
-    <ul id="history">
-        <li>Chưa có dữ liệu</li>
-    </ul>
-</div>
-
-<div class="box">
-    <h3>Phân tích</h3>
-    <div id="analysis">Chưa có dữ liệu</div>
+<div style="max-width:1400px;margin:20px auto;background:#1e2937;border-radius:20px;padding:20px;color:white">
+    <div style="display:flex;justify-content:space-between;margin-bottom:6px">
+        <small>Tiến độ mô phỏng</small>
+        <span id="percentText">0%</span>
+    </div>
+    <div class="progress-bar"><div id="progressFill" class="progress-fill"></div></div>
 </div>
 
 <script>
-    let historyData = [];
+    const btn = document.getElementById("generateBtn");
+    let eventSource = null;
+
+    function resetUI() {
+        document.getElementById("rounds").innerHTML = `
+      <div style="margin-bottom:15px">
+        <h3>📊 Quá trình mô phỏng AI</h3>
+        <span id="roundCount" style="background:#e11d48;color:white;padding:4px 12px;border-radius:30px;font-size:0.9rem;font-weight:bold;">0 vòng</span>
+      </div>`;
+        document.getElementById("result").innerHTML = "";
+        document.getElementById("tables").innerHTML = "";
+        document.getElementById("progressFill").style.width = "0%";
+        document.getElementById("percentText").textContent = "0%";
+    }
 
     function generate() {
-        const nums = generateNumbers();
-        document.getElementById("predict").innerHTML =
-            nums.map(n => `<span>${n}</span>`).join("");
+        btn.disabled = true;
+        btn.innerHTML = `🔄 ĐANG MÔ PHỎNG...`;
+        resetUI();
 
-        historyData.unshift(nums);
-        renderHistory();
-        analyze();
-    }
+        eventSource = new EventSource("/api/lotto-535/predict");
 
-    function generateNumbers() {
-        // 5 số chính từ 1–35
-        const main = new Set();
-        while (main.size < 5) {
-            main.add(Math.floor(Math.random() * 35) + 1);
-        }
+        eventSource.onmessage = (e) => console.log("SSE default:", e.data);
 
-        // 1 số đặc biệt 1–12
-        const special = Math.floor(Math.random() * 12) + 1;
+        eventSource.addEventListener("round", (e) => {
+            const r = JSON.parse(e.data);
+            const div = document.createElement("div");
+            div.className = "round";
 
-        return [...main].sort((a, b) => a - b).concat(special);
-    }
+            // 5 số chính + số đặc biệt (index 5) màu vàng
+            let nums = r.numbers.slice(0, 5).map((n, i) =>
+                `<span class="idx${i}">[${i}]<b>${String(n).padStart(2,'0')}</b></span>`
+            ).join(' ');
 
-    function renderHistory() {
-        const ul = document.getElementById("history");
-        ul.innerHTML = "";
-        historyData.slice(0, 10).forEach(row => {
-            const li = document.createElement("li");
-            li.textContent = row.join(" - ");
-            ul.appendChild(li);
+            const special = r.numbers[5];
+            nums += ` &nbsp;<span class="idx5">★<b>${String(special).padStart(2,'0')}</b></span>`;
+
+            div.innerHTML = `<b>Vòng ${r.round}</b> &nbsp; ${nums}`;
+            const roundsDiv = document.getElementById("rounds");
+            roundsDiv.appendChild(div);
+            roundsDiv.scrollTop = roundsDiv.scrollHeight;
+            document.getElementById("roundCount").textContent = r.round + " vòng";
         });
+
+        eventSource.addEventListener("progress", (e) => {
+            const p = parseInt(e.data);
+            document.getElementById("progressFill").style.width = p + "%";
+            document.getElementById("percentText").textContent = p + "%";
+        });
+
+        eventSource.addEventListener("ping", () => {});
+
+        eventSource.addEventListener("complete", (e) => {
+            const data = JSON.parse(e.data);
+            const main = data.main;       // [5 số chính]
+            const special = data.special; // 1 số đặc biệt
+
+            // Hiển thị: 5 ball đỏ | dấu | 1 ball vàng to hơn
+            document.getElementById("result").innerHTML = `
+        ${main.map(n => `<div class="ball">${String(n).padStart(2,'0')}</div>`).join('')}
+        <div class="separator">|</div>
+        <div class="ball-special">${String(special).padStart(2,'0')}</div>
+      `;
+
+            // Bảng tần suất: 5 số chính dạng grid + 1 bảng đặc biệt riêng
+            let gridHTML = `<div class="freq-grid" style="margin-bottom:20px">`;
+            for (let i = 0; i < 5; i++) {
+                const freq = data.freq[i];
+                const entries = Object.entries(freq)
+                    .map(([k,v]) => [parseInt(k), v])
+                    .sort((a,b) => a[0]-b[0]);
+
+                gridHTML += `
+          <div>
+            <h4 style="margin:0 0 8px;color:#0f172a;font-size:0.9rem">
+              Vị trí ${i} <span style="color:#e11d48">(→ ${String(main[i]).padStart(2,'0')})</span>
+            </h4>
+            <table>
+              <tr><th>Số</th><th>Lần</th></tr>
+              ${entries.map(([num, count]) => `
+                <tr style="${num === main[i] ? 'background:#fff1f2;font-weight:bold' : ''}">
+                  <td>${String(num).padStart(2,'0')}</td><td>${count}</td>
+                </tr>`).join('')}
+            </table>
+          </div>`;
+            }
+            gridHTML += `</div>`;
+
+            // Bảng số đặc biệt riêng
+            const specialFreq = data.freq[5];
+            const specialEntries = Object.entries(specialFreq)
+                .map(([k,v]) => [parseInt(k), v])
+                .sort((a,b) => a[0]-b[0]);
+
+            gridHTML += `
+        <div class="special-freq">
+          <h4 style="margin:0 0 8px;color:#d97706;font-size:0.95rem">
+            ★ Số đặc biệt (1–12) <span style="color:#d97706">(→ ${String(special).padStart(2,'0')})</span>
+          </h4>
+          <table>
+            <tr><th style="background:#fffbeb;color:#d97706">Số</th><th style="background:#fffbeb;color:#d97706">Lần</th></tr>
+            ${specialEntries.map(([num, count]) => `
+              <tr style="${num === special ? 'background:#fffbeb;font-weight:bold' : ''}">
+                <td>${String(num).padStart(2,'0')}</td><td>${count}</td>
+              </tr>`).join('')}
+          </table>
+        </div>`;
+
+            document.getElementById("tables").innerHTML = gridHTML;
+
+            eventSource.close();
+            btn.disabled = false;
+            btn.innerHTML = `🚀 TẠO BỘ SỐ MAY MẮN`;
+        });
+
+        eventSource.onerror = () => {
+            eventSource.close();
+            alert("❌ Mất kết nối SSE");
+            btn.disabled = false;
+            btn.innerHTML = `🚀 TẠO BỘ SỐ MAY MẮN`;
+        };
     }
 
-    function analyze() {
-        const count = {};
-        historyData.flat().forEach(n => count[n] = (count[n] || 0) + 1);
-
-        const top = Object.entries(count)
-            .sort((a, b) => b[1] - a[1])
-            .slice(0, 3)
-            .map(x => x[0]);
-
-        document.getElementById("analysis").innerText =
-            "Số xuất hiện nhiều nhất: " + top.join(", ");
-    }
+    btn.addEventListener("click", generate);
 </script>
-
 </body>
 </html>
